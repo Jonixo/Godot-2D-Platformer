@@ -795,6 +795,9 @@ tile_set = SubResource("TileSet_tab6s")
 [node name="CharacterBody2D" type="CharacterBody2D" parent="."]
 collision_layer = 2
 script = ExtResource("2_hqm6u")
+jump_height = 75.0
+jump_time_to_peak = 0.3
+jump_time_to_descent = 0.3
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D"]
 position = Vector2(0, -15)
@@ -813,6 +816,8 @@ zoom = Vector2(3, 3)
 limit_bottom = 300
 position_smoothing_enabled = true
 drag_horizontal_enabled = true
+
+[node name="CoyoteTimer" type="Timer" parent="CharacterBody2D"]
 
 [node name="Area2D_PlayerResetArea" type="Area2D" parent="."]
 collision_layer = 0
@@ -864,7 +869,7 @@ motion_mirroring = Vector2(960, 0)
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="ParallaxBackground/ParallaxLayer5"]
 sprite_frames = SubResource("SpriteFrames_faofm")
 autoplay = "default"
-frame_progress = 0.888359
+frame_progress = 0.170101
 centered = false
 
 [node name="ParallaxLayer6" type="ParallaxLayer" parent="ParallaxBackground"]
@@ -874,7 +879,8 @@ motion_mirroring = Vector2(945, 745)
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="ParallaxBackground/ParallaxLayer6"]
 sprite_frames = SubResource("SpriteFrames_5pdct")
 autoplay = "default"
-frame_progress = 0.699771
+frame_progress = 0.981514
 centered = false
 
+[connection signal="timeout" from="CharacterBody2D/CoyoteTimer" to="CharacterBody2D" method="coyote_timeout"]
 [connection signal="body_entered" from="Area2D_PlayerResetArea" to="Area2D_PlayerResetArea" method="_on_body_entered"]

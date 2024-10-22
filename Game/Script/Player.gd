@@ -5,18 +5,60 @@ const SPEED = 170
 const JUMP_VELOCITY = -450
 const GRAVITY = 1800
 
+@export var jump_height : float
+@export var jump_time_to_peak : float
+@export var jump_time_to_descent : float
+@export var coyote_time : float = .1
+@export var jump_buffer_timer : float = .1
+
+
+@onready var coyote_timer = $CoyoteTimer
+@onready var jump_velocity : float = ((2.0 * jump_height) / jump_time_to_peak) * -1.0
+@onready var jump_gravity : float = ((-2.0 * jump_height) / (jump_time_to_peak * jump_time_to_peak)) * -1.0
+@onready var fall_gravity : float = ((-2.0 * jump_height) / (jump_time_to_descent * jump_time_to_descent)) * -1.0
+
+var jump_available: bool = true
+var jump_buffer: bool = false
+
 @onready var animated_sprite_2d = $AnimatedSprite2D
 
 func _ready():
 	GameManager.player = self
 	GameManager.playerOriginalPos = position
+	
+	
+func jump():
+	velocity.y = jump_velocity
+	jump_available = false
+
+func coyote_timeout():
+	jump_available = false
 
 func movement(delta):
-	if is_on_floor() == false:
-		velocity.y += GRAVITY * delta
+	if not is_on_floor():
+		if jump_available:
+			if coyote_timer.is_stopped():
+				coyote_timer.start(coyote_time)
+				#get_tree().create_timer(coyote_time).timeout.connect(coyote_timeout)
 		
-	if Input.is_action_just_pressed("Jump") and is_on_floor():
-		velocity.y += JUMP_VELOCITY
+		if  velocity.y > 0.0:
+			velocity.y += jump_gravity * delta
+		else:
+			velocity.y += jump_gravity * delta
+			fall_gravity
+	else:
+		jump_available = true
+		coyote_timer.stop()
+		if jump_buffer:
+			jump()
+			jump_buffer = false
+		
+	if Input.is_action_just_pressed("Jump"):
+		if jump_available:
+			jump()
+		else:
+			jump_buffer = true
+			get_tree().create_timer(jump_buffer_timer).timeout.connect(on_jump_buffer_timeout)
 		
 	var direction = Input.get_axis("Left","Right")
 	
@@ -28,6 +70,7 @@ func movement(delta):
 	if Input.is_action_just_pressed("Down") and is_on_floor():
 		position.y += 3
 		
+
 	move_and_slide()
 	
 func updateAnimation():
@@ -42,6 +85,9 @@ func updateAnimation():
 		animated_sprite_2d.play("Jump")
 		
 	
+func on_jump_buffer_timeout() -> void:
+	jump_buffer = false
+	 
 func _process(delta):
 	updateAnimation()
 
