@@ -819,6 +819,12 @@ drag_horizontal_enabled = true
 
 [node name="CoyoteTimer" type="Timer" parent="CharacterBody2D"]
 
+[node name="DashTimer" type="Timer" parent="CharacterBody2D"]
+wait_time = 0.3
+
+[node name="DashTimeout" type="Timer" parent="CharacterBody2D"]
+wait_time = 2.0
+
 [node name="Area2D_PlayerResetArea" type="Area2D" parent="."]
 collision_layer = 0
 collision_mask = 2
@@ -883,4 +889,6 @@ frame_progress = 0.981514
 centered = false
 
 [connection signal="timeout" from="CharacterBody2D/CoyoteTimer" to="CharacterBody2D" method="coyote_timeout"]
+[connection signal="timeout" from="CharacterBody2D/DashTimer" to="CharacterBody2D" method="on_dashing_timeout"]
+[connection signal="timeout" from="CharacterBody2D/DashTimeout" to="CharacterBody2D" method="_on_dash_timeout_timeout"]
 [connection signal="body_entered" from="Area2D_PlayerResetArea" to="Area2D_PlayerResetArea" method="_on_body_entered"]

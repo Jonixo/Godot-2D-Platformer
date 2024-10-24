@@ -1,9 +1,11 @@
 extends CharacterBody2D
 
 
-const SPEED = 170
+const SPEED = 175
 const JUMP_VELOCITY = -450
 const GRAVITY = 1800
+
+const DASH_SPEED = 500
 
 @export var jump_height : float
 @export var jump_time_to_peak : float
@@ -11,7 +13,8 @@ const GRAVITY = 1800
 @export var coyote_time : float = .1
 @export var jump_buffer_timer : float = .1
 
-
+@onready var dash_timeout = $DashTimeout
+@onready var dash_timer = $DashTimer
 @onready var coyote_timer = $CoyoteTimer
 @onready var jump_velocity : float = ((2.0 * jump_height) / jump_time_to_peak) * -1.0
 @onready var jump_gravity : float = ((-2.0 * jump_height) / (jump_time_to_peak * jump_time_to_peak)) * -1.0
@@ -19,6 +22,8 @@ const GRAVITY = 1800
 
 var jump_available: bool = true
 var jump_buffer: bool = false
+var dashing: bool = false
+var can_dash: bool = true
 
 @onready var animated_sprite_2d = $AnimatedSprite2D
 
@@ -61,9 +66,18 @@ func movement(delta):
 			get_tree().create_timer(jump_buffer_timer).timeout.connect(on_jump_buffer_timeout)
 		
 	var direction = Input.get_axis("Left","Right")
+	if Input.is_action_just_pressed("dashing") and can_dash: 
+		dashing = true
+		dash_timer.start()
+		dash_timeout.start()
+		can_dash = false
 	
 	if direction != 0:
-		velocity.x = direction * SPEED
+
+		if not dashing:
+			velocity.x = direction * SPEED
+		else:
+			velocity.x = direction * DASH_SPEED
 	else:
 		velocity.x = 0
 		
@@ -87,6 +101,12 @@ func updateAnimation():
 	
 func on_jump_buffer_timeout() -> void:
 	jump_buffer = false
+	
+func on_dashing_timeout() -> void:
+	dashing = false
+	
+func _on_dash_timeout_timeout():
+	can_dash = true	
 	 
 func _process(delta):
 	updateAnimation()
